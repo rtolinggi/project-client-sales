@@ -21,7 +21,7 @@ model clusters {
 
 model employees {
   employeeId   String             @id @db.VarChar(45) @default(uuid()) @map("employee_id")
-  userId       String             @unique @db.VarChar(45) @map("user_id")
+  userId       String?             @unique @db.VarChar(45) @map("user_id")
   firstName    String             @db.VarChar(200) @map("first_name")
   lastName     String             @db.VarChar(200) @map("last_name")
   gender       employees_gender
@@ -36,7 +36,7 @@ model employees {
   updatedAt    DateTime           @updatedAt @map("updated_at")
   users        users?             @relation(fields: [userId], references: [userId], onDelete: Cascade, map: "fk_employees_users")
   orders       orders[]
-  task          tasks[]
+  task         tasks[]
 
   @@index([userId], map: "fk_employees_users_idx")
 }
@@ -120,7 +120,7 @@ model suppliers {
 }
 
 model users {
-  userId       String      @id @db.VarChar(45) @map("user_id")
+  userId       String      @id @db.VarChar(45) @map("user_id") @default(uuid())
   email        String      @unique(map: "email_UNIQUE") @db.VarChar(220)
   passwordHash String      @db.VarChar(35) @map("password_hash")
   isActive     Boolean     @default(false) @map("is_active")
