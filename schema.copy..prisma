@@ -122,7 +122,7 @@ model suppliers {
 model users {
   userId       String      @id @db.VarChar(45) @map("user_id") @default(uuid())
   email        String      @unique(map: "email_UNIQUE") @db.VarChar(220)
-  passwordHash String      @db.VarChar(250) @map("password_hash")
+  passwordHash String      @db.VarChar(35) @map("password_hash")
   isActive     Boolean     @default(false) @map("is_active")
   isVerified   Boolean     @default(false) @map("is_verified")
   accessToken  String?     @db.Text @map("access_token")

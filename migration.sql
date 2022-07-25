@@ -17,7 +17,7 @@ CREATE TABLE `clusters` (
 -- CreateTable
 CREATE TABLE `employees` (
     `employee_id` VARCHAR(45) NOT NULL,
-    `user_id` VARCHAR(45) NOT NULL,
+    `user_id` VARCHAR(45) NULL,
     `first_name` VARCHAR(200) NOT NULL,
     `last_name` VARCHAR(200) NOT NULL,
     `gender` ENUM('F', 'M') NOT NULL,
