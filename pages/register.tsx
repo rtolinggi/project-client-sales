@@ -12,13 +12,20 @@ import {
 import { z } from "zod";
 import { useForm, zodResolver } from "@mantine/form";
 import type { NextPage } from "next";
+import Link from "next/link";
 
-const schema = z.object({
-  email: z.string().email({ message: "Invalid email" }),
-  passwordHash: z
-    .string()
-    .min(6, { message: "Password should have at least 6 letters" }),
-});
+const schema = z
+  .object({
+    email: z.string().email({ message: "Invalid email" }),
+    passwordHash: z
+      .string()
+      .min(6, { message: "Password should have at least 6 letters" }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.passwordHash === data.confirmPassword, {
+    message: "Password not match",
+    path: ["confirmPassword"],
+  });
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -55,19 +62,20 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const Home: NextPage = () => {
+const Register: NextPage = () => {
   const { classes } = useStyles();
   const form = useForm({
     validate: zodResolver(schema),
     initialValues: {
       email: "",
       passwordHash: "",
+      confirmPassword: "",
     },
   });
 
   const handleSubmit = async () => {
     const formData = form.values;
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,7 +96,7 @@ const Home: NextPage = () => {
           mt="md"
           mb={50}
         >
-          Login Admin
+          Register Account
         </Title>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
@@ -106,25 +114,28 @@ const Home: NextPage = () => {
             size="md"
             {...form.getInputProps("passwordHash")}
           />
-          <Checkbox label="Keep me logged in" mt="xl" size="md" />
+          <PasswordInput
+            label="Repeat Password"
+            required
+            placeholder="Repeat Password"
+            mt="md"
+            size="md"
+            {...form.getInputProps("confirmPassword")}
+          />
           <Button fullWidth mt="xl" size="md" type="submit">
-            Login
+            Register
           </Button>
         </form>
 
         <Text align="center" mt="md">
-          Don&apos;t have an account?{" "}
-          <Anchor<"a">
-            href="#"
-            weight={700}
-            onClick={(event) => event.preventDefault()}
-          >
-            Register
-          </Anchor>
+          have an account?{" "}
+          <Link href="login">
+            <Anchor weight={700}>Login</Anchor>
+          </Link>
         </Text>
       </Paper>
     </div>
   );
 };
 
-export default Home;
+export default Register;

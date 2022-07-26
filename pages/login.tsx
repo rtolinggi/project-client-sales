@@ -8,10 +8,30 @@ import {
   Title,
   Text,
   Anchor,
+  Notification,
 } from "@mantine/core";
+import { useMutation } from "@tanstack/react-query";
+import Axios from "../libs/axios";
 import { z } from "zod";
 import { useForm, zodResolver } from "@mantine/form";
 import type { NextPage } from "next";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { IconX } from "@tabler/icons";
+import { useState } from "react";
+
+type LoginProps = {
+  email: string;
+  passwordHash: string;
+};
+
+type ErrorMessage = {
+  response: {
+    data: {
+      message: string;
+    };
+  };
+};
 
 const schema = z.object({
   email: z.string().email({ message: "Invalid email" }),
@@ -55,8 +75,10 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const Home: NextPage = () => {
+const Login: NextPage = () => {
   const { classes } = useStyles();
+  const [errMessage, setErrMessage] = useState<string>("");
+  const router = useRouter();
   const form = useForm({
     validate: zodResolver(schema),
     initialValues: {
@@ -65,19 +87,27 @@ const Home: NextPage = () => {
     },
   });
 
-  const handleSubmit = async () => {
-    const formData = form.values;
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    const result = await response.json();
-    console.log(result);
+  const postLogin = async (data: LoginProps) => {
+    const response = await Axios.post("login", data);
+    return await response.data;
   };
+
+  const mutation = useMutation(postLogin, {
+    onError(error: ErrorMessage, variables, context) {
+      const message = error.response.data.message;
+      setErrMessage(message);
+    },
+    onSuccess(data, variables, context) {
+      console.log(data);
+      router.push("dashboard");
+    },
+  });
+
+  const handleSubmit = async () => {
+    console.log(form.values);
+    mutation.mutate(form.values);
+  };
+
   return (
     <div className={classes.wrapper}>
       <Paper className={classes.form} radius={0} p={30}>
@@ -86,10 +116,15 @@ const Home: NextPage = () => {
           className={classes.title}
           align="center"
           mt="md"
-          mb={50}
+          mb={mutation.isError ? 25 : 50}
         >
           Login Admin
         </Title>
+        {mutation.isError && (
+          <Notification icon={<IconX size={14} />} color="red" mb={25}>
+            {errMessage}
+          </Notification>
+        )}
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <TextInput
             label="Email address"
@@ -107,24 +142,27 @@ const Home: NextPage = () => {
             {...form.getInputProps("passwordHash")}
           />
           <Checkbox label="Keep me logged in" mt="xl" size="md" />
-          <Button fullWidth mt="xl" size="md" type="submit">
+          <Button
+            variant="gradient"
+            fullWidth
+            mt="xl"
+            size="md"
+            type="submit"
+            loading={mutation.isLoading}
+          >
             Login
           </Button>
         </form>
 
         <Text align="center" mt="md">
           Don&apos;t have an account?{" "}
-          <Anchor<"a">
-            href="#"
-            weight={700}
-            onClick={(event) => event.preventDefault()}
-          >
-            Register
-          </Anchor>
+          <Link href="register">
+            <Anchor weight={700}>Register</Anchor>
+          </Link>
         </Text>
       </Paper>
     </div>
   );
 };
 
-export default Home;
+export default Login;

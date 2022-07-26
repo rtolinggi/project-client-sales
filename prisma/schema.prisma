@@ -125,7 +125,6 @@ model users {
   passwordHash String      @db.VarChar(250) @map("password_hash")
   isActive     Boolean     @default(false) @map("is_active")
   isVerified   Boolean     @default(false) @map("is_verified")
-  accessToken  String?     @db.Text @map("access_token")
   refreshToken String?     @db.Text @map("refresh_token")
   createdAt    DateTime    @default(now()) @map("created_at")
   updatedAt    DateTime    @updatedAt @map("updated_at")
